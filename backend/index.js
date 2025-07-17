@@ -59,8 +59,8 @@ app.use('/api/turfs', turfRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use(cors({ 
   origin: [
-    'https://turfease-2jf4.onrender.com', // <-- your deployed frontend URL
-    'http://localhost:3000'
+    'https://turfease-2jf4.onrender.com', // 
+    'http://localhost:3000' 
   ], 
   credentials: true 
 }));
