@@ -15,7 +15,13 @@ const MongoStore = require('connect-mongo');
 const app = express();
 
 // Middleware
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({ 
+  origin: [
+    'https://turfease-2jf4.onrender.com', // 
+    'http://localhost:3000' 
+  ], 
+  credentials: true 
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const sessionStore = MongoStore.create({
@@ -57,13 +63,8 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/turfs', turfRoutes);
 app.use('/api/bookings', bookingRoutes);
-app.use(cors({ 
-  origin: [
-    'https://turfease-2jf4.onrender.com', // 
-    'http://localhost:3000' 
-  ], 
-  credentials: true 
-}));
+
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 
