@@ -15,6 +15,8 @@ interface AuthContextType {
   fetchUser: () => Promise<void>;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -29,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     }, 1000); // 1 seconds max
     try {
-      const res = await fetch("http://localhost:5000/api/auth/me", { credentials: "include" });
+      const res = await fetch(`${API_URL}/api/auth/me`, { credentials: "include" });
       clearTimeout(timeout);
       if (didTimeout) return;
       if (res.ok) {
@@ -54,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (username: string, password: string) => {
-    const res = await fetch("http://localhost:5000/api/auth/login", {
+    const res = await fetch(`${API_URL}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -68,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    await fetch("http://localhost:5000/api/auth/logout", {
+    await fetch(`${API_URL}/api/auth/logout`, {
       method: "POST",
       credentials: "include",
     });
