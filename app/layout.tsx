@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider defaultTheme="system" storageKey="turfease-ui-theme">
           <AuthProvider>
             <Navbar />
-            {children}
+          {children}
           </AuthProvider>
         </ThemeProvider>
       </body>

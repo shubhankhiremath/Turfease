@@ -15,10 +15,11 @@ const MongoStore = require('connect-mongo');
 const app = express();
 
 // Middleware
+app.set('trust proxy', 1); // trust first proxy
 app.use(cors({ 
   origin: [
     'https://turfease-2jf4.onrender.com', // 
-    
+    'http://localhost:3000' 
   ], 
   credentials: true 
 }));
