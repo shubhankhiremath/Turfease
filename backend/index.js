@@ -18,7 +18,7 @@ const app = express();
 app.use(cors({ 
   origin: [
     'https://turfease-2jf4.onrender.com', // 
-    'http://localhost:3000' 
+    
   ], 
   credentials: true 
 }));
@@ -35,6 +35,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'turf-ease-secret',
   resave: false,
   saveUninitialized: false,
+  
   cookie: {
     httpOnly: true,
     secure: true,
