@@ -66,7 +66,15 @@ app.use('/api/auth', authRoutes);
 app.use('/api/turfs', turfRoutes);
 app.use('/api/bookings', bookingRoutes);
 
-
+app.get('/api/test-session', (req, res) => {
+  if (req.session.views) {
+    req.session.views++;
+    res.send(`Number of views: ${req.session.views}`);
+  } else {
+    req.session.views = 1;
+    res.send('Welcome! Refresh to count views.');
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 
