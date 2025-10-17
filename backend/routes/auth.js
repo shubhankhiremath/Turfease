@@ -13,7 +13,7 @@ router.post('/login', (req, res, next) => {
     if (!user) return res.status(400).json({ message: info?.message || 'Invalid credentials' });
     req.logIn(user, err => {
       if (err) return res.status(500).json({ message: 'Login failed' });
-      
+      console.log('User logged in:', user);
       console.log('User logged in, session:', req.session);
       return authController.login(req, res);
     });
