@@ -16,12 +16,23 @@ const app = express();
 
 // Middleware
 app.set('trust proxy', 1); // trust first proxy
-app.use(cors({ 
-  origin: [
-    'https://turfease-2jf4.onrender.com', // 
-    'http://localhost:3000' 
-  ], 
-  credentials: true 
+// Configure CORS to allow frontend origin(s). Prefer setting FRONTEND_URL in the environment
+// For multiple origins you can set ALLOWED_ORIGINS as a comma-separated list.
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
+  : [process.env.FRONTEND_URL || 'http://localhost:3000', 'https://turfease-2jf4.onrender.com'];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin like mobile apps or curl
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('CORS policy: Origin not allowed'), false);
+    }
+  },
+  credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
