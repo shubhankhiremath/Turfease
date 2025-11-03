@@ -1,22 +1,21 @@
 "use client";
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { supabase } from "@/lib/supabase";
-import { User as SupabaseUser } from "@supabase/supabase-js";
 
 interface User {
   id: string;
+  username: string;
   email: string;
-  username?: string;
-  fullName?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
 }
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -26,81 +25,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUser = async () => {
     setLoading(true);
+    let didTimeout = false;
+    const timeout = setTimeout(() => {
+      didTimeout = true;
+      setLoading(false);
+    }, 1000); // 1 seconds max
     try {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-      if (sessionError) {
-        console.error("Error getting session:", sessionError.message);
-        setUser(null);
+      const res = await fetch(`${API_URL}/api/auth/me`, { credentials: "include" });
+      clearTimeout(timeout);
+      if (didTimeout) return;
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data.user);
         setLoading(false);
-        return;
-      }
-
-      if (session) {
-        const { data: { user: supabaseUser }, error: userError } = await supabase.auth.getUser();
-
-        if (userError) {
-          console.error("Error getting user:", userError.message);
-          setUser(null);
-          setLoading(false);
-          return;
-        }
-
-        if (supabaseUser) {
-          setUser({
-            id: supabaseUser.id,
-            email: supabaseUser.email || "",
-            username: (supabaseUser.user_metadata as any)?.username,
-            fullName: (supabaseUser.user_metadata as any)?.full_name,
-          });
-        } else {
-          setUser(null);
-        }
       } else {
         setUser(null);
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Auth context fetch user error:", err);
-      setUser(null);
-    } finally {
-      setLoading(false);
+    } catch {
+      clearTimeout(timeout);
+      if (!didTimeout) {
+        setUser(null);
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
     fetchUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        fetchUser();
-      } else {
-        setUser(null);
-      }
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+  const login = async (username: string, password: string) => {
+    const res = await fetch(`${API_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ username, password }),
     });
-    if (error) {
-      console.error("Login error:", error.message);
-      return false;
+    if (res.ok) {
+      await fetchUser();
+      return true;
     }
-    await fetchUser();
-    return true;
+    return false;
   };
 
   const logout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("Logout error:", error.message);
-    }
+    await fetch(`${API_URL}/api/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
     setUser(null);
   };
 
@@ -115,4 +88,4 @@ export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
-}
+} 
