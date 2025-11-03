@@ -20,6 +20,17 @@ exports.register = async (req, res) => {
 };
 
 exports.login = (req, res) => {
+  // Debug: log session and user presence (do not log sensitive cookie values)
+  try {
+    console.log('authController.login - req.user present:', !!req.user);
+    console.log('authController.login - req.session present:', !!req.session, 'sessionID:', req.sessionID);
+    if (req.session && req.session.cookie) {
+      console.log('authController.login - session.cookie:', { maxAge: req.session.cookie.maxAge, secure: req.session.cookie.secure, sameSite: req.session.cookie.sameSite });
+    }
+  } catch (e) {
+    console.error('authController.login - debug logging failed', e);
+  }
+
   res.json({ message: 'Logged in', user: { id: req.user._id, username: req.user.username, email: req.user.email } });
 };
 
@@ -31,6 +42,15 @@ exports.logout = (req, res) => {
 };
 
 exports.getCurrentUser = (req, res) => {
+  // Debug: indicate whether request has cookie header and user/session info
+  try {
+    console.log('authController.getCurrentUser - cookie header present:', !!req.headers.cookie);
+    console.log('authController.getCurrentUser - req.user present:', !!req.user);
+    console.log('authController.getCurrentUser - req.session present:', !!req.session, 'sessionID:', req.sessionID);
+  } catch (e) {
+    console.error('authController.getCurrentUser - debug logging failed', e);
+  }
+
   if (!req.user) return res.status(401).json({ message: 'Not authenticated' });
   res.json({ user: { id: req.user._id, username: req.user.username, email: req.user.email } });
 }; 

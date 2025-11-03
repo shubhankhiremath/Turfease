@@ -50,8 +50,10 @@ app.use(session({
   
   cookie: {
     httpOnly: true,
-    secure: true,
-    sameSite: 'none',
+    // Use secure cookies in production (requires HTTPS). In development allow non-secure for localhost.
+    secure: process.env.NODE_ENV === 'production',
+    // For cross-site requests (Netlify frontend -> Render backend) we need 'none' in production.
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: 1000 * 60 * 60 * 24 // 1 day
   }
 }));
