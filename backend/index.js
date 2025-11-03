@@ -79,6 +79,41 @@ app.use('/api/auth', authRoutes);
 app.use('/api/turfs', turfRoutes);
 app.use('/api/bookings', bookingRoutes);
 
+// Temporary debug endpoint - remove in production
+app.get('/api/debug/session', (req, res) => {
+  // Allow CORS for this debug endpoint
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Safe debug info - no sensitive data
+  const debug = {
+    session: {
+      exists: !!req.session,
+      id: req.sessionID,
+      cookie: req.session?.cookie ? {
+        secure: req.session.cookie.secure,
+        sameSite: req.session.cookie.sameSite,
+        expires: req.session.cookie.expires,
+      } : null
+    },
+    user: req.user ? {
+      exists: true,
+      id: req.user._id
+    } : null,
+    headers: {
+      origin: req.headers.origin,
+      cookie: !!req.headers.cookie,
+    },
+    env: {
+      nodeEnv: process.env.NODE_ENV,
+      frontendUrl: process.env.FRONTEND_URL,
+      allowedOrigins: allowedOrigins,
+    }
+  };
+  
+  res.json(debug);
+});
+
 app.get('/api/test-session', (req, res) => {
   if (req.session.views) {
     req.session.views++;
